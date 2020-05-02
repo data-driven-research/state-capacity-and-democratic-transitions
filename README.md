@@ -24,6 +24,3 @@ Project Organization
     └── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
                               generated with `pip freeze > requirements.txt`.
 --------
-
-# TO-DO
-* add requirements.txt
