@@ -4,11 +4,8 @@ import pandas as pd
 from time import sleep
 from itertools import chain
 from datetime import datetime
+from typing import List, Iterator
 
-
-URL = "http://api.worldbank.org/v2/country/"
-DATE = datetime.today().strftime("%Y-%m-%d %H_%M")
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 COUNTRIES = {
     "Baltic States": ["EST", "LVA", "LTU"],
@@ -23,12 +20,21 @@ INDICATORS = {
     "Public Sector": ["GC.TAX.TOTL.GD.ZS", "MS.MIL.TOTL.TF.ZS"]
 }
 
+URL = "http://api.worldbank.org/v2/country/"
+DATE = datetime.today().strftime("%Y-%m-%d %H_%M")
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ISO3_PARAM = ';'.join(chain(*COUNTRIES.values()))
+INDICATOR_PARAM = list(chain(*INDICATORS.values()))
 
-def mapping(s, metadict):
+
+def mapping(s: pd.Series, metadict: dict) -> str:
+    """ Assign categories to Series' values according to dict's keys. """
+    
     return ' '.join((k) for k,v in metadict.items() if s in v)
 
 
-def item_generator(data):
+def item_level(data: List) -> Iterator:
+    """ Iterate over data and yield dict containing specific fields. """
     
     for item in data:
         yield {
@@ -39,23 +45,32 @@ def item_generator(data):
             "value": item["value"]
         }
         
-
-def indicator_generator(indicators):
+def page_level(indicator: str) -> Iterator:
+    """ Iterate over all pages related to specific indicator. """
     
-    _iso3 = ';'.join(chain(*COUNTRIES.values()))
+    base_url = f"{URL}{ISO3_PARAM}/indicator/{indicator}?format=json"
+
+    next_page = 1
+    while True:
+        meta, data = requests.get(f"{base_url}&page={next_page}").json()
+        yield from item_level(data)
+            
+        num_pages, next_page = meta["pages"], next_page + 1
+        if next_page > num_pages:
+            break
+            
+        sleep(1)
+
+def indicator_level(indicators: List) -> Iterator:
+    """ Iterate over all indicators. """
     
     for indicator in indicators:
-        meta = requests.get(f"{URL}{_iso3}/indicator/{indicator}?format=json").json()[0]
-        sleep(1)
-        
-        for page in range(1, meta["pages"]+1):
-            meta, data = requests.get(f"{URL}{_iso3}/indicator/{indicator}?format=json&page={page}").json()
-            yield from item_generator(data)
-            sleep(1)
+        yield from page_level(indicator) 
         
 
 def main():
-    df = pd.DataFrame(indicator_generator(list(chain(*INDICATORS.values()))))
+    """ Create pd.DataFrame from generator and save it. """
+    df = pd.DataFrame(indicator_level(INDICATOR_PARAM))
     df["year"] = df["year"].astype(int)
     df["region"] = df["iso3"].apply(mapping, metadict=COUNTRIES)
     df["category"] = df["id"].apply(mapping, metadict=INDICATORS)
