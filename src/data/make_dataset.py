@@ -23,17 +23,26 @@ INDICATORS = {
 URL = "http://api.worldbank.org/v2/country/"
 DATE = datetime.today().strftime("%Y-%m-%d %H_%M")
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-ISO3_PARAM = ';'.join(chain(*COUNTRIES.values()))
-INDICATOR_PARAM = list(chain(*INDICATORS.values()))
+ISO3_PARAM = ';'.join(chain.from_iterable(COUNTRIES.values()))
+INDICATOR_PARAM = list(chain.from_iterable(INDICATORS.values()))
 
 
-def mapping(s: pd.Series, metadict: dict) -> str:
-    """ Assign categories to Series' values according to dict's keys. """
+def invert(d):
+    """ Invert dictionary. 
     
-    return ' '.join((k) for k,v in metadict.items() if s in v)
+    
+    >>> d = {
+    ...     "cat1": ["a", "b"],
+    ...     "cat2": ["c", "d"],
+    ... }
+    >>> invert(d)
+    {'a': 'cat1', 'b': 'cat1', 'c': 'cat2', 'd': 'cat2'}
+    """
+    
+    return {v: k for k, values in d.items() for v in values}
 
 
-def item_level(data: List) -> Iterator:
+def extract_items(data: List) -> Iterator:
     """ Iterate over data and yield dict containing specific fields. """
     
     for item in data:
@@ -45,35 +54,32 @@ def item_level(data: List) -> Iterator:
             "value": item["value"]
         }
         
-def page_level(indicator: str) -> Iterator:
+def get_indicator_data(indicator: str) -> Iterator:
     """ Iterate over all pages related to specific indicator. """
     
-    base_url = f"{URL}{ISO3_PARAM}/indicator/{indicator}?format=json"
-
-    next_page = 1
+    url = f"{URL}{ISO3_PARAM}/indicator/{indicator}"
+    page = 1
     while True:
-        meta, data = requests.get(f"{base_url}&page={next_page}").json()
-        yield from item_level(data)
-            
-        num_pages, next_page = meta["pages"], next_page + 1
-        if next_page > num_pages:
+        meta, data = requests.get(url, params={"page": page, "format": "json"}).json()
+        yield from extract_items(data)
+        page += 1
+        if page > meta["pages"]:
             break
-            
         sleep(1)
 
-def indicator_level(indicators: List) -> Iterator:
+def get_dataframe(indicators: List) -> Iterator:
     """ Iterate over all indicators. """
     
     for indicator in indicators:
-        yield from page_level(indicator) 
+        yield from get_indicator_data(indicator) 
         
 
 def main():
     """ Create pd.DataFrame from generator and save it. """
-    df = pd.DataFrame(indicator_level(INDICATOR_PARAM))
+    df = pd.DataFrame(get_dataframe(INDICATOR_PARAM))
     df["year"] = df["year"].astype(int)
-    df["region"] = df["iso3"].apply(mapping, metadict=COUNTRIES)
-    df["category"] = df["id"].apply(mapping, metadict=INDICATORS)
+    df["region"] = df["iso3"].map(invert(COUNTRIES))
+    df["category"] = df["id"].map(invert(INDICATORS))
     df.loc[df["year"] >= 1991].to_excel(f"{CURRENT_DIR}/../../data/raw/dataset_{DATE}.xlsx", index=False)
 
 
