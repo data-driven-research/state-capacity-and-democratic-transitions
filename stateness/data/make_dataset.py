@@ -10,14 +10,17 @@ from typing import List, Iterator
 COUNTRIES = {
     "Baltic States": ["EST", "LVA", "LTU"],
     "Central Asia": ["KAZ", "KGZ", "TJK", "TKM", "UZB"],
-    "Eastern Europe": ["BLR", "MDA", "UKR"],
+    "Eastern Europe": ["BLR", "MDA", "UKR", "SRB"],
     "Eurasia": ["RUS"],
     "Transcaucasia": ["ARM", "AZE", "GEO"]
 }
 INDICATORS = {
-    "Infrastructure": ["EG.ELC.ACCS.RU.ZS", "IT.CEL.SETS"],
-    "Medicine": ["SH.DYN.MORT", "SH.DYN.AIDS.ZS"],
-    "Public Sector": ["GC.TAX.TOTL.GD.ZS", "MS.MIL.TOTL.TF.ZS"]
+    "Coercion" : ["MS.MIL.TOTL.TF.ZS", "MS.MIL.XPND.GD.ZS"],
+    "Infrastructure": [
+        "EG.ELC.ACCS.RU.ZS", "EG.USE.ELEC.KH.PC",
+        "SH.DYN.MORT", "SH.MED.BEDS.ZS"
+    ],
+    "Taxes": ["GC.TAX.TOTL.GD.ZS", "IQ.CPA.FISP.XQ"]
 }
 
 URL = "http://api.worldbank.org/v2/country/"
@@ -80,7 +83,8 @@ def main():
     df["year"] = df["year"].astype(int)
     df["region"] = df["iso3"].map(invert(COUNTRIES))
     df["category"] = df["id"].map(invert(INDICATORS))
-    df.loc[df["year"] >= 1991].to_excel(f"{CURRENT_DIR}/../../data/raw/dataset_{DATE}.xlsx", index=False)
+    df.to_excel(f"{CURRENT_DIR}/../../data/raw/dataset_{DATE}.xlsx", index=False)
+    df.loc[df["year"].between(1999, 2016)].to_excel(f"{CURRENT_DIR}/../../data/interim/world-bank-data_{DATE}.xlsx", index=False)
 
 
 if __name__ == "__main__":
