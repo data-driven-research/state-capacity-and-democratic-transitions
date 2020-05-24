@@ -1,9 +1,7 @@
 regimes-and-governance-project
 ==============================
 
-Group project for Regimes and Governance.
-
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hp0404/regimes-and-governance-project/first-version)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hp0404/regimes-and-governance-project/master)
 
 TO-DO
 ------------
