@@ -15,12 +15,19 @@ COUNTRIES = {
     "Transcaucasia": ["ARM", "AZE", "GEO"]
 }
 INDICATORS = {
-    "Coercion" : ["MS.MIL.TOTL.TF.ZS", "MS.MIL.XPND.GD.ZS"],
-    "Infrastructure": [
-        "EG.ELC.ACCS.RU.ZS", "EG.USE.ELEC.KH.PC",
-        "SH.DYN.MORT", "SH.MED.BEDS.ZS"
+    "Coercion" : [
+        "MS.MIL.TOTL.TF.ZS", 
+        "MS.MIL.XPND.GD.ZS"
     ],
-    "Taxes": ["GC.TAX.TOTL.GD.ZS", "IQ.CPA.FISP.XQ"]
+    "Infrastructure": [
+        "EG.ELC.ACCS.RU.ZS", "EG.USE.ELEC.KH.PC", "SH.DYN.MORT", 
+        "SH.MED.BEDS.ZS", "SH.TBS.INCD", "IS.RRS.PASG.KM", 
+        "SH.H2O.BASW.ZS", "SH.H2O.SMDW.ZS", "SH.STA.HYGN.ZS"
+        ],
+    "Taxes": [
+        "GC.TAX.TOTL.GD.ZS",
+        "IQ.CPA.FISP.XQ"
+    ]
 }
 
 URL = "http://api.worldbank.org/v2/country/"
@@ -77,6 +84,26 @@ def get_dataframe(indicators: List) -> Iterator:
         yield from get_indicator_data(indicator) 
         
 
+def select_cases(df):
+    """ Select cases for Research Question #1. """
+    
+    case_1 = (df["iso3"].eq("SRB") & df["year"].eq(2000))
+    case_2 = (df["iso3"].eq("GEO") & df["year"].eq(2003))
+    case_3 = (df["iso3"].eq("UKR") & df["year"].eq(2004))
+    case_4 = (df["iso3"].eq("KGZ") & df["year"].eq(2005))
+    case_5 = (df["iso3"].eq("MDA") & df["year"].eq(2009))
+    case_6 = (df["iso3"].eq("KGZ") & df["year"].eq(2010))
+    case_7 = (df["iso3"].eq("UKR") & df["year"].eq(2014))
+    case_8 = (df["iso3"].eq("ARM") & df["year"].eq(2018))
+    
+    selected = df.loc[
+        case_1 | case_2 | case_3 | case_4 | 
+        case_5 | case_6 | case_7 | case_8
+    ].copy()
+    
+    return selected
+        
+
 def main():
     """ Create pd.DataFrame from generator and save it. """
     df = pd.DataFrame(get_dataframe(INDICATOR_PARAM))
@@ -84,7 +111,8 @@ def main():
     df["region"] = df["iso3"].map(invert(COUNTRIES))
     df["category"] = df["id"].map(invert(INDICATORS))
     df.to_excel(f"{CURRENT_DIR}/../../data/raw/dataset_{DATE}.xlsx", index=False)
-    df.loc[df["year"].between(1999, 2016)].to_excel(f"{CURRENT_DIR}/../../data/interim/world-bank-data_{DATE}.xlsx", index=False)
+    select_cases(df).to_excel(f"{CURRENT_DIR}/../../data/interim/world-bank-selected-cases_{DATE}.xlsx", index=False)
+    df.loc[df["year"] >= 1991].to_excel(f"{CURRENT_DIR}/../../data/interim/world-bank-data_{DATE}.xlsx", index=False)
 
 
 if __name__ == "__main__":
