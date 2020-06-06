@@ -25,7 +25,7 @@ binomial_dist <- df %>%
   xlab("Потужність держави") + ylab("Успішність революції") +
   labs(
     title = "Потужність держави та успішність революцій",
-    subtitle = "Згруповано за типом визначення потужності держави",
+    subtitle = "Згруповано за підходом до визначення потужності держави",
     caption = "Вихідний код можна знайти тут: https://github.com/hp0404/regimes-and-governance-project"
   )
 
@@ -51,7 +51,7 @@ boxplots <- ggplot(df, aes(x = successful_transition, y = stateness, group=succe
   #theme(text=element_text(size=16,  family="Garamond")) +
   labs(
     title = "Потужність держави та успішність революцій",
-    subtitle = "Згруповано за типом визначення потужності держави",
+    subtitle = "Згруповано підходом до визначення потужності держави",
     caption = "Вихідний код можна знайти тут: https://github.com/hp0404/regimes-and-governance-project"
     )
 
