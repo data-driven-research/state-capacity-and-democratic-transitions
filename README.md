@@ -3,13 +3,6 @@ regimes-and-governance-project
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hp0404/regimes-and-governance-project/master)
 
-TO-DO
-------------
-1. Add `Makefile`
-2. Rename & restructure source folder: `make_dataset.py` should run all scripts via @click.  
-3. Polity4 & WorldBank use different country codes. 
-4. Calculate stateness.
-
 
 Project Organization
 ------------
@@ -23,7 +16,7 @@ Project Organization
     │
     ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
     │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-hp-initial-data-exploration`.
+    │                         `1.0-hp-data validation`.
     │
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
     │
