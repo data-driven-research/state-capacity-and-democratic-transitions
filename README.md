@@ -1,7 +1,7 @@
-regimes-and-governance-project
+State capacity and democratic transitions
 ==============================
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/hp0404/regimes-and-governance-project/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/show-your-research/state-capacity-and-democratic-transitions/master)
 
 
 Project Organization
