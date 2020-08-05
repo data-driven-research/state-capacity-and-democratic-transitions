@@ -1,7 +1,7 @@
 State capacity and democratic transitions
 ==============================
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/show-your-research/state-capacity-and-democratic-transitions/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/data-driven-research/state-capacity-and-democratic-transitions/master)
 
 
 Project Organization
